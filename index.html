@@ -67,6 +67,7 @@ button{font:inherit;font-weight:700;padding:12px 28px;border:0;border-radius:8px
 #lb ol{margin:0;padding-left:26px;font-size:16px;line-height:1.8}
 #lb li{overflow-wrap:anywhere}#lb li span{float:right;font-weight:800;color:#ffb347;margin-left:8px}
 #lb .ft{text-align:center;font-size:13px;opacity:.85;margin-top:12px}
+#lsw{margin-top:14px;font-size:14px;text-align:center;text-shadow:0 1px 4px #000}#lsst{min-height:18px;margin:6px 0;font-weight:700}#lshint{opacity:.85;font-size:13px}
 #lbbox{display:none;margin:8px 0;font-size:16px;font-weight:700}
 </style></head><body>
 <canvas id="c"></canvas>
@@ -91,7 +92,7 @@ button{font:inherit;font-weight:700;padding:12px 28px;border:0;border-radius:8px
 </div>
 <div id="cut"><div class="cbar" id="ctop"></div><div class="cbar" id="cbot"></div><div id="cdlg"></div><div id="ctitle"><b>BELLY MAN</b><span>5000 HP</span></div><div id="cfade"></div><button id="cskip">Skip &#9656; (Enter)</button></div>
 <div id="menu"><h1>EDP445 Shooter</h1><div id="sub" style="font-size:20px;font-weight:700;display:none"></div>
-<div id="lbbox"><div id="lbmsg"></div><div id="lbent" style="display:none">Enter your name for the leaderboard<br><input id="lbn" maxlength="20" autocomplete="off" spellcheck="false" style="font:700 20px system-ui,sans-serif;width:12em;max-width:100%;box-sizing:border-box;text-align:center;margin:8px 0 2px;padding:6px"><br><button id="lbsub" style="padding:8px 18px">Submit</button> <button id="lbskip" style="padding:8px 18px;background:rgba(255,255,255,.18)">Skip</button></div></div><button id="start">Start</button><button id="mpb" style="background:#2d6cdf">Multiplayer</button>
+<div id="lbbox"><div id="lbmsg"></div><div id="lbent" style="display:none">Enter your name for the leaderboard<br><input id="lbn" maxlength="20" autocomplete="off" spellcheck="false" style="font:700 20px system-ui,sans-serif;width:12em;max-width:100%;box-sizing:border-box;text-align:center;margin:8px 0 2px;padding:6px"><br><button id="lbsub" style="padding:8px 18px">Submit</button></div></div><button id="start">Start</button><button id="mpb" style="background:#2d6cdf">Multiplayer</button>
 <div id="mp" style="display:none;width:min(520px,92vw);text-align:left"><div id="mpbtns" style="text-align:center"><button id="mph">Host game</button> <button id="mpj" style="background:#2d6cdf">Join game</button></div>
 <div id="mpst" style="margin:10px 0;font-size:14px;text-align:center"></div>
 <div id="hbox" style="display:none;font-size:14px;text-align:center">Your game code:<div id="code" style="font:700 44px monospace;letter-spacing:8px;margin:6px 0">----</div></div>
@@ -153,7 +154,7 @@ var slotsEl=$('slots');W.forEach(function(w,i){var d=document.createElement('div
 var running=false,P=new THREE.Vector3(0,1.6,0),yaw=0,pitch=0,vy=0,hp=MAXHP,kills=0,npcs=[],packs=[],gs=[],booms=[],keys={},firing=false,cur=0,gren=0,hitCd=0,recoil=0,punch=0,wave=0,waveT=1,pull=1,pside=0,gPend=0,SLIDE=.42,slideT=0,slideCd=0,sdx=0,sdz=0,mx=0,mz=0,camOff=0,roll=0;
 var raycaster=new THREE.Raycaster();
 var net=0,G=0,nT=0,nid=0;
-var paused=0,pausedAt=0,vol=1,sens=1,escVis=false,wk=1,nmul=1;
+var paused=0,pausedAt=0,vol=1,sens=1,escVis=false,wk=1,nmul=1,ncap=0;
 var cut=0,cutDone=0,ct=0,stage=null,cutFire='',cu=null;
 var AC;function beep(f,d,t){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),g=AC.createGain();o.type=t||'square';o.frequency.value=f;g.gain.value=.05*vol;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.stop(AC.currentTime+d)}catch(e){}}
 var NB2;function noiseBuf(){if(!NB2){var len=AC.sampleRate*1.5|0,dd;NB2=AC.createBuffer(1,len,AC.sampleRate);dd=NB2.getChannelData(0);for(var i=0;i<len;i++)dd[i]=Math.random()*2-1}return NB2}
@@ -194,7 +195,7 @@ function ui(){$('hpnum').textContent=Math.ceil(hp);$('hpfill').style.width=Math.
 function sel(i){cur=i;vms.forEach(function(g,j){g.visible=j===i});pull=1;ui();}
 function reload(){var w=W[cur];if(cur>1||w.rel>0||w.ammo===w.mag)return;w.rel=w.rl;ui();}
 function reset(){endCut(1);cutDone=0;npcs.forEach(function(n){scene.remove(n)});packs.forEach(function(n){scene.remove(n)});gs.forEach(function(g){scene.remove(g.m)});booms.forEach(function(b){scene.remove(b.m)});
- npcs=[];packs=[];gs=[];booms=[];P.set(SPX[myId]||0,1.6,0);yaw=0;pitch=0;vy=0;hp=MAXHP;kills=0;gren=0;gPend=0;wave=0;nmul=1;waveT=1;slideT=0;slideCd=0;mx=0;mz=0;camOff=0;roll=0;wb.style.opacity=0;hitCd=0;peers.forEach(function(L){L.hp=MAXHP;L.hitCd=0;L.pos.set(SPX[L.id]||0,1.6,0);L.yaw=0;L.init=0});others.forEach(function(r){r.hp=MAXHP;r.init=0});
+ npcs=[];packs=[];gs=[];booms=[];P.set(SPX[myId]||0,1.6,0);yaw=0;pitch=0;vy=0;hp=MAXHP;kills=0;gren=0;gPend=0;wave=0;nmul=1;ncap=0;waveT=1;slideT=0;slideCd=0;mx=0;mz=0;camOff=0;roll=0;wb.style.opacity=0;hitCd=0;peers.forEach(function(L){L.hp=MAXHP;L.hitCd=0;L.pos.set(SPX[L.id]||0,1.6,0);L.yaw=0;L.init=0});others.forEach(function(r){r.hp=MAXHP;r.init=0});
  W.forEach(function(w){w.ammo=w.mag;w.rel=0;w.cd=0});sel(0);}
 // NPCs
 var TEX=new THREE.TextureLoader().load("data:image/jpeg;base64,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");
@@ -206,12 +207,12 @@ function makeNpc(type){var g=new THREE.Group(),max=type===3?5000:type===2?200:15
 function spawn(t){var x,z,n=0;do{x=(Math.random()*2-1)*(ARENA-2);z=(Math.random()*2-1)*(ARENA-2);n++}while(Math.hypot(x-P.x,z-P.z)<12&&n<50);
  var g=makeNpc(t||(kills>=10?2:1));g.position.set(x,0,z);scene.add(g);npcs.push(g);}
 var wb=document.createElement('div');wb.style.cssText='position:fixed;left:0;right:0;top:22%;text-align:center;font:700 40px sans-serif;color:#fff;text-shadow:0 2px 8px #000;pointer-events:none;opacity:0;transition:opacity .4s;z-index:5';document.body.appendChild(wb);
-function startWave(){wave++;if(cutDone)nmul+=.05;var n=2*wave+2;for(var i=0;i<n;i++)spawn();ui();}
+function startWave(){wave++;if(cutDone&&!ncap)nmul+=.05;var n=2*wave+2;for(var i=0;i<n;i++)spawn();ui();}
 function startSlide(){if(slideT>0||slideCd>0||P.y>1.6+1e-3)return;var f=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0),s=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0);if(!f&&!s)f=1;var l=Math.hypot(f,s);f/=l;s/=l;
  sdx=-Math.sin(yaw)*f+Math.cos(yaw)*s;sdz=-Math.cos(yaw)*f-Math.sin(yaw)*s;slideT=SLIDE;slideCd=0;mx=0;mz=0;beep(140,.3,'triangle');}
 function tint(n,c){n.traverse(function(o){if(o.material&&o.material.emissive)o.material.emissive.setHex(c)});}
 function damage(n,d){var u=n.userData;if(G){send({t:'h',id:u.id,d:d});u.fl=.1;tint(n,0x661111);return;}u.hp-=d;u.bar.scale.x=Math.max(.001,u.hp/u.max);u.fl=.1;tint(n,0x661111);
- if(u.hp<=0){scene.remove(n);var i=npcs.indexOf(n);if(i>=0)npcs.splice(i,1);kills++;beep(300,.12,'sawtooth');
+ if(u.hp<=0){scene.remove(n);var i=npcs.indexOf(n);if(i>=0)npcs.splice(i,1);kills++;if(kills>=230)ncap=1;beep(300,.12,'sawtooth');
   if(u.type===3){var bx0=n.position.x,bz0=n.position.z;dropPack(bx0,bz0);packs[packs.length-1].userData.seek=1;dropAmmo(bx0+1.5,bz0);packs[packs.length-1].userData.seek=1;}
   if(kills%10===0)dropPack();if(kills%5===0)dropAmmo();if(!npcs.length)waveT=3;ui();checkCut();}}
 function pkPos(g,x,z){if(x===undefined){var a=Math.random()*6.28,r=3+Math.random()*4;x=Math.max(-ARENA+2,Math.min(ARENA-2,P.x+Math.cos(a)*r));z=Math.max(-ARENA+2,Math.min(ARENA-2,P.z+Math.sin(a)*r));}g.position.set(x,1,z);scene.add(g);packs.push(g);}
@@ -292,40 +293,42 @@ function cutTick(){var t=ct,S=cu,i,s=SH[3];if(!S)return;
  $('cfade').style.opacity=t<.6?1-t/.6:t>=11?Math.min(1,(t-11)/.6):0;
  if(t>=11.7)endCut();}
 // ===== leaderboards: shared db (kept outside the page, survives republishing) =====
-var DB=null,runNet=0,runHost=1,runNames=[],lbOpen=0,lbPend=null,lbName='';
-try{if(window.claude&&claude.use)claude.use('db').then(function(d){DB=d}).catch(function(){})}catch(e){}
-// Shared server leaderboard outside Claude: paste your Firebase Realtime Database URL below
-// (e.g. 'https://my-game-default-rtdb.firebaseio.com'). Leave empty for browser-local scores only.
-var LB_URL='';
-function lbBase(){return LB_URL.replace(/\/+$/,'')}
-function lbCol(b){return DB.collection('lb2_'+b)}
-function lbLoc(b){try{return JSON.parse(localStorage.getItem('lb2_'+b)||'[]')}catch(e){return[]}}
-function lbTop(b){
-  if(DB)return lbCol(b).orderBy('k','desc').limit(3).get().then(function(q){return q.docs.map(function(d){var x=d.data()||{};return{n:String(x.n||'?'),k:+x.k||0}})});
-  if(LB_URL)return fetch(lbBase()+'/lb2_'+b+'.json?orderBy=%22k%22&limitToLast=3').then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(o){o=o||{};return Object.keys(o).map(function(i){return{n:String(o[i].n||'?'),k:+o[i].k||0}}).sort(function(x,y){return y.k-x.k}).slice(0,3)});
-  return Promise.resolve(lbLoc(b).slice(0,3))}
-function lbAdd(b,name,k){
-  if(DB)return lbCol(b).add({n:name,k:k,t:Date.now()});
-  if(LB_URL)return fetch(lbBase()+'/lb2_'+b+'.json',{method:'POST',body:JSON.stringify({n:name,k:k,t:Date.now()})}).then(function(r){if(!r.ok)throw 0});
-  var l=lbLoc(b);l.push({n:name,k:k});l.sort(function(x,y){return y.k-x.k});try{localStorage.setItem('lb2_'+b,JSON.stringify(l.slice(0,3)))}catch(e){}return Promise.resolve()}
-function lbSubmit(b,name,k){return lbTop(b).then(function(l){if(l.length>=3&&k<=l[2].k)return 0;var r=l.filter(function(x){return x.k>=k}).length+1;return lbAdd(b,name,k).then(function(){return r})})}
+var runNet=0,runHost=1,runNames=[],lbOpen=0,lbPend=null,lbName='',lbT=0,LBMEM={solo:[],multi:[]};
+// No server or database: scores are kept in this browser (localStorage) and merged between players who connect in a multiplayer game or use the menu's Sync leaderboard (direct WebRTC, Google STUN, PeerJS pairing)
+var LBCAP=20000;
+function lbNorm(l){var best={},o=[];(Array.isArray(l)?l:[]).forEach(function(x){if(!x||typeof x!=='object')return;
+  var k=Math.floor(+x.k),t=Math.floor(+x.t)||0,v=x.v?1:0,n=String(x.n==null?'':x.n).replace(/[\u0000-\u001f\u007f-\u009f]/g,'').slice(0,60);
+  if(!isFinite(k)||k<0||k>100000||!n)return;var id=k+'|'+t,q=best[id];if(q){if(v>q.v){q.n=n;q.v=v}return}q={n:n,k:k,t:t,v:v};best[id]=q;o.push(q)});
+  o.sort(function(a,c){return c.k-a.k||a.t-c.t});return o.slice(0,LBCAP)}
+function lbRaw(b){var a=[];try{a=JSON.parse(localStorage.getItem('lb3all_'+b)||'[]')}catch(e){}return Array.isArray(a)?a:[]}
+function lbAll(b){return lbNorm(lbRaw(b).concat(LBMEM[b]))}
+function lbLoc(b){return lbAll(b).slice(0,3)}
+function lbSave(b,l){l=lbNorm(lbRaw(b).concat(l));LBMEM[b]=l;try{localStorage.setItem('lb3all_'+b,JSON.stringify(l))}catch(e){}}
+function lbChg(a,b){if(a.length!==b.length)return true;var s=0,q=0;a.forEach(function(x){s+=x.v});b.forEach(function(x){q+=x.v});return s!==q}
+function lbTop(b){return Promise.resolve(lbLoc(b))}
+function lbRec(b,name,k,t,v){lbSave(b,[{n:name,k:k,t:t,v:v}]);fbPut(b,name,k,t,v);lsPush([[b==='multi'?1:0,name,k,t,v]]);lsKick()}
+function lbSubmit(b,name,k,t){t=t||Date.now();var l=lbAll(b).filter(function(x){return!(x.t===t&&x.k===k)}).slice(0,3),r=(l.length>=3&&k<=l[2].k)?0:l.filter(function(x){return x.k>=k}).length+1;lbRec(b,name,k,t,1);return Promise.resolve(r)}
+function lbSend(L){sendTo(L,{t:'l',solo:lbLoc('solo'),multi:lbLoc('multi')})}
+function lbMerge(m){var ch=0;['solo','multi'].forEach(function(b){var old=lbAll(b),nw=lbNorm(old.concat(Array.isArray(m[b])?m[b].slice(0,10):[]));if(lbChg(old,nw)){lbSave(b,nw);ch=1}});if(ch&&lbOpen)lbRefresh();return ch}
+function lbMergeAll(items){var by={solo:[],multi:[]},ch=0;items.forEach(function(x){if(!Array.isArray(x)||x.length<4)return;by[x[0]===1?'multi':'solo'].push({n:x[1],k:x[2],t:x[3],v:x[4]})});
+  ['solo','multi'].forEach(function(b){if(!by[b].length)return;var old=lbAll(b),nw=lbNorm(old.concat(by[b]));if(lbChg(old,nw)){lbSave(b,nw);ch=1}});if(ch&&lbOpen)lbRefresh();return ch}
+function lsItems(){var a=[];[['solo',0],['multi',1]].forEach(function(q){lbAll(q[0]).forEach(function(x){a.push([q[1],x.n,x.k,x.t,x.v])})});return a}
 function lbFill(id,l,err){var o=$(id);o.textContent='';
   if(err||!l.length){var e=document.createElement('li');e.textContent=err||'No scores yet';e.style.listStyle='none';o.appendChild(e);return}
   l.forEach(function(x){var li=document.createElement('li'),sp=document.createElement('span');sp.textContent=x.k;li.appendChild(sp);li.appendChild(document.createTextNode(x.n));o.appendChild(li)})}
-function lbRefresh(){var ids={solo:'lbs_',multi:'lbd_'};
+function lbRefresh(){var ids={solo:'lbs_',multi:'lbd_'},c=$('lscnt');if(c)c.textContent='Scores saved on this browser: '+lbAll('solo').length+' solo, '+lbAll('multi').length+' multiplayer';
   Object.keys(ids).forEach(function(b){var id=ids[b],done=0,tm;lbFill(id,0,'Loading...');tm=setTimeout(function(){if(!done)lbFill(id,0,'Server unreachable')},10000);
    lbTop(b).then(function(l){done=1;clearTimeout(tm);lbFill(id,l)}).catch(function(){done=1;clearTimeout(tm);lbFill(id,0,'Unavailable')})})}
-function setLB(v){v=v?1:0;if(v===lbOpen)return;lbOpen=v;$('lb').style.display=v?'flex':'none';if(v)lbRefresh()}
+function setLB(v){v=v?1:0;if(v===lbOpen)return;lbOpen=v;$('lb').style.display=v?'flex':'none';if(v){lbRefresh();fbPull()}}
 addEventListener('blur',function(){setLB(0)});
 function lbEnd(wasRun){setLB(0);var box=$('lbbox'),msg=$('lbmsg');box.style.display='none';$('lbent').style.display='none';msg.textContent='';lbPend=null;
   if(!wasRun)return;
-  if(!runNet){box.style.display='block';$('lbent').style.display='block';$('lbn').value=lbName;lbPend=kills;}
+  if(!runNet){lbT=Date.now();lbRec('solo',lbName||cleanName($('nm').value)||'Player',kills,lbT,0);box.style.display='block';$('lbent').style.display='block';$('lbn').value=lbName;lbPend=kills;}
   else if(runHost){var nm=(live().length?hostList().map(function(a){return a[1]}):runNames).join(' & ').slice(0,60),k=kills;
    box.style.display='block';msg.textContent='Saving multiplayer score...';
-   lbSubmit('multi',nm,k).then(function(r){msg.textContent=r?'Saved to the multiplayer leaderboard: #'+r:'Multiplayer score ('+k+' kills) is not in the top 3'}).catch(function(){msg.textContent='Could not save the multiplayer score'})}}
+   lbSubmit('multi',nm,k).then(function(r){msg.textContent=r?'Saved to the multiplayer leaderboard: #'+r:'Multiplayer score ('+k+' kills) is not in the top 3';live().forEach(lbSend)}).catch(function(){msg.textContent='Could not save the multiplayer score'})}}
 $('lbsub').onclick=function(){var n=cleanName($('lbn').value),k=lbPend;if(!n){$('lbn').focus();return}if(k==null)return;lbPend=null;lbName=n;$('lbent').style.display='none';$('lbmsg').textContent='Saving...';
-  lbSubmit('solo',n,k).then(function(r){$('lbmsg').textContent=r?'Saved! You are #'+r+' on the solo leaderboard':'Not in the top 3 this time ('+k+' kills)'}).catch(function(){$('lbmsg').textContent='Could not save your score'})};
-$('lbskip').onclick=function(){lbPend=null;$('lbbox').style.display='none'};
+  lbSubmit('solo',n,k,lbT).then(function(r){$('lbmsg').textContent=r?'Saved! You are #'+r+' on the solo leaderboard':'Not in the top 3 this time ('+k+' kills)'}).catch(function(){$('lbmsg').textContent='Could not save your score'})};
 $('lbn').addEventListener('keydown',function(e){e.stopPropagation();if(e.key==='Enter')$('lbsub').click()});
 $('lbn').addEventListener('keyup',function(e){e.stopPropagation()});
 function die(){var wasRun=running;endCut(1);if(net&&!G&&running)send({t:'o'});running=false;firing=false;if(document.exitPointerLock)document.exitPointerLock();$('sub').style.display='block';$('sub').textContent='You died. Kills: '+kills;$('start').textContent='Play again';$('menu').style.display='flex';lobbyUI();lbEnd(wasRun);}
@@ -414,10 +417,11 @@ function onMsg(L,m){
     else if(m.t==='o'){hp=0;ui();if(running)die();}
     else if(m.t==='s'&&running)applySnap(m);
     else if(m.t==='r')applyRoster(m);
+     else if(m.t==='l')lbMerge(m);
   }else if(L.st===2){ // host: messages from a guest
     if(m.t==='p'){var x=+m.x,y=+m.y,z=+m.z,w=+m.w;if(isFinite(x+y+z+w)){L.pos.set(x,y,z);L.yaw=w;L.af=+m.f===1;}}
     else if(m.t==='h'){var n=npcs.find(function(q){return q.userData.id===m.id});if(n&&running)damage(n,Math.min(+m.d||0,200));}
-    else if(m.t==='n'){var nn=cleanName(m.n);if(nn.length>=5){L.name=nn;sendRoster();}}}}
+    else if(m.t==='n'){var nn=cleanName(m.n);if(nn.length>=5){L.name=nn;sendRoster();}}else if(m.t==='l'){if(lbMerge(m))live().forEach(function(q){if(q!==L)lbSend(q)})}}}
 function st(t){$('mpst').textContent=t}
 // names / roster
 function nameHint(){var n=cleanName($('nm').value).length,ok=n>=5&&n<=20;$('nmh').textContent=ok?n+'/20':'Name must be 5-20 characters ('+n+'/20)';$('nmh').style.color=ok?'':'#ff7070';return ok}
@@ -432,10 +436,10 @@ function applyRoster(m){var l=(Array.isArray(m.l)?m.l:[]).filter(Array.isArray).
 function lobbyUI(){var d=function(i,v){$(i).style.display=v?'block':'none'};
   d('hbox',mode===1);d('jbox',mode===2&&!net);d('nbox',mode>0||net);d('roster',mode===1||net);d('mpbtns',!net)}
 function hostStatus(){if(mode!==1||!rr)return;var n=live().length+1;st(n>=MAXP?'Lobby full ('+n+'/'+MAXP+'). Press Start!':'Waiting for players ('+n+'/'+MAXP+')...')}
-function guestUp(){leaveR();up.st=2;net=1;G=1;others=[];$('mpb').style.display='none';$('start').style.display='none';$('sub').style.display='block';$('sub').textContent='Connected. Waiting for the host to start...';lobbyUI()}
+function guestUp(){leaveR();up.st=2;net=1;G=1;others=[];$('mpb').style.display='none';$('start').style.display='none';$('sub').style.display='block';$('sub').textContent='Connected. Waiting for the host to start...';lbSend(up);lobbyUI()}
 function hostUp(L){if(L.gone||L.st===2||peers.indexOf(L)<0)return;clearTimeout(L.tm);L.st=2;L.hp=MAXHP;L.hitCd=0;L.pos.set(SPX[L.id]||0,1.6,0);L.yaw=0;L.init=0;L.av=makeAv(L.id);net=1;
   $('mpb').style.display='none';$('start').style.display='';$('sub').style.display='block';$('sub').textContent=L.name+' connected! Press Start.';
-  hostStatus();sendRoster();lobbyUI()}
+  hostStatus();sendRoster();lbSend(L);lobbyUI()}
 function dropPeer(L){if(L.gone)return;L.gone=1;var was=L.st===2;clearTimeout(L.tm);closeLink(L);rmAv(L);var i=peers.indexOf(L);if(i>=0)peers.splice(i,1);try{if(L.cn)L.cn.close()}catch(e){}
   if(!was){hostStatus();return}
   if(live().length){sendRoster();$('sub').style.display='block';$('sub').textContent=L.name+' left the game';hostStatus();return}
@@ -499,6 +503,105 @@ $('nm').addEventListener('keydown',function(e){e.stopPropagation();if(e.key==='E
 $('nm').addEventListener('keyup',function(e){e.stopPropagation()});
 $('nm').addEventListener('input',function(){if(!nameHint())return;myNm=cleanName($('nm').value);if(G)sendTo(up,{t:'n',n:myNm});else if(mode===1||net)sendRoster()});
 $('nm').value='Player'+(1000+Math.floor(Math.random()*9000));myNm=cleanName($('nm').value);nameHint();
+// ===== automatic leaderboard sync =====
+// One shared hub: the first browser to claim the fixed PeerJS id becomes the hub; every other browser finds it by that id and pairs through
+// PeerJS's free server. After pairing, scores travel over a direct WebRTC data channel (Google STUN via ICE) that STAYS OPEN, so every new
+// score is pushed to the hub the instant it is recorded and the hub relays it to everyone else. On connect both sides swap their full history.
+// If the hub leaves, the remaining browsers race to claim the hub id; whoever wins already holds a copy of everything it received.
+var FB='https://edp445-shooter-default-rtdb.firebaseio.com/';   // Firebase Realtime Database URL, e.g. 'https://my-game-default-rtdb.firebaseio.com' (see the online backend section below)
+var HUB='fps4-lb-hub',lsP=null,lsHub=0,lsLinks=[],lsUp=null,lsBusy=0,lsTm=0;
+function lsSt(t){var e=$('lsst');if(e)e.textContent=t}
+function lsNConn(){return lsLinks.filter(function(x){return x.ready}).length}
+function lsHubSt(){var n=lsNConn();lsSt('Sync hub: online, '+n+' player'+(n===1?'':'s')+' connected, scores sync live')}
+function lsSig(cn,d){if(cn&&cn.open)try{cn.send(d)}catch(e){}}
+function lsClose(x){var i=lsLinks.indexOf(x);if(i>=0)lsLinks.splice(i,1);if(lsUp===x)lsUp=null;x.ready=0;try{if(x.pc)x.pc.close()}catch(e){}try{if(x.cn)x.cn.close()}catch(e){}}
+function lsDestroy(){var p=lsP;lsP=null;lsHub=0;if(p)try{p.destroy()}catch(e){}}
+function lsReset(t){clearTimeout(lsTm);lsLinks.slice().forEach(lsClose);lsBusy=0;lsDestroy();if(t)lsSt(t)}
+function lsSend(x,o){var c=x&&x.ch;if(c&&c.readyState==='open')try{c.send(JSON.stringify(o))}catch(e){}}
+function lsSendItems(x,a){for(var i=0;i<a.length;i+=300)lsSend(x,{a:a.slice(i,i+300)});lsSend(x,{end:1})}
+// push new score(s) to every live link right now (hub: all guests; guest: the hub)
+function lsPush(a,except){var t=lsHub?lsLinks:(lsUp?[lsUp]:[]);t.forEach(function(x){if(x!==except&&x.ready)lsSendItems(x,a)})}
+function lsDrop(x){if(lsLinks.indexOf(x)<0)return;lsClose(x);
+  if(lsHub){lsHubSt();return}
+  if(x.g){lsReset('Sync: lost the hub, reconnecting...');setTimeout(lsClaim,500+Math.random()*1500)}}
+function lsWire(x,ch){x.ch=ch;var rx=[];
+  ch.onopen=function(){x.ready=1;
+    if(lsHub)lsHubSt();
+    else{lsUp=x;lsBusy=0;clearTimeout(lsTm);lsSt('Sync: connected to the hub, scores sync live');var p=lsP;setTimeout(function(){if(lsP===p&&p){lsP=null;try{p.destroy()}catch(e){}}},2000)}
+    lsSendItems(x,lsItems())};
+  ch.onmessage=function(e){var m;try{m=JSON.parse(e.data)}catch(z){return}if(!m||typeof m!=='object')return;
+    if(Array.isArray(m.a)){if(rx.length<40000)rx=rx.concat(m.a.slice(0,500));return}
+    if(!m.end)return;var items=rx.filter(function(q){return Array.isArray(q)&&q.length>=4});rx=[];
+    if(lbMergeAll(items)&&lsHub&&items.length)lsPush(items,x)};
+  ch.onclose=function(){lsDrop(x)}}
+function lsPcFor(x){var pc=x.pc=new RTCPeerConnection(ICE);pc.onconnectionstatechange=function(){var s=pc.connectionState;if(x.pc===pc&&(s==='failed'||s==='closed'))lsDrop(x)};return pc}
+// hub side: serve one incoming browser
+function lsServe(cn){if(lsLinks.length>=20){try{cn.close()}catch(e){}return}
+  var x={pc:null,cn:cn,ready:0},nonce='',used=0;lsLinks.push(x);
+  setTimeout(function(){if(!x.ready)lsClose(x)},30000);
+  cn.on('data',function(d){if(!d||typeof d!=='object')return;
+    if(d.k==='hi'&&typeof d.n==='string'&&!used){used=1;nonce=d.n;var pc=lsPcFor(x);lsWire(x,pc.createDataChannel('lb'));
+      pc.createOffer().then(function(o){return pc.setLocalDescription(o)}).then(function(){return gather(pc)}).then(function(){if(x.pc===pc)lsSig(cn,{k:'off',n:nonce,d:sdp(pc)})}).catch(function(){lsClose(x)})}
+    else if(d.k==='ans'&&used&&d.n===nonce&&x.pc&&d.d){x.pc.setRemoteDescription({type:d.d.t,sdp:d.d.s}).catch(function(){lsClose(x)})}});
+  cn.on('close',function(){if(!x.pc)lsClose(x)});
+  cn.on('error',function(){})}
+// guest side: connect to the existing hub and stay connected
+function lsJoinHub(){lsBusy=1;lsSt('Sync: joining the hub...');var nonce=Math.random().toString(36).slice(2,12),p;
+  try{p=new Peer()}catch(e){lsReset('Sync: could not join, will retry');return}
+  lsP=p;clearTimeout(lsTm);lsTm=setTimeout(function(){if(lsP===p&&!lsUp)lsReset('Sync: hub not responding, will retry')},30000);
+  p.on('open',function(){if(lsP!==p)return;var cn=p.connect(HUB,{serialization:'json',reliable:true}),x={pc:null,cn:cn,g:1,ready:0};lsLinks.push(x);
+    cn.on('open',function(){if(lsP===p)lsSig(cn,{k:'hi',n:nonce})});
+    cn.on('data',function(d){if(lsP!==p||!d||typeof d!=='object'||d.k!=='off'||d.n!==nonce||x.pc||!d.d)return;
+      var pc=lsPcFor(x);pc.ondatachannel=function(e){lsWire(x,e.channel)};
+      pc.setRemoteDescription({type:d.d.t,sdp:d.d.s}).then(function(){return pc.createAnswer()}).then(function(a){return pc.setLocalDescription(a)}).then(function(){return gather(pc)}).then(function(){if(x.pc===pc)lsSig(cn,{k:'ans',n:nonce,d:sdp(pc)})}).catch(function(){lsReset('Sync: could not connect, will retry')})});
+    cn.on('error',function(){})});
+  p.on('error',function(e){if(lsP!==p)return;
+    if(e&&e.type==='peer-unavailable'){lsReset('Sync: hub went away, taking over...');setTimeout(lsClaim,1000);return}
+    lsReset('Sync: could not reach the code server, will retry')})}
+// try to become the hub; if someone already is, join it instead
+function lsClaim(){if(FB||lsBusy||lsHub||lsUp||net)return;
+  if(typeof Peer!=='function'){lsSt('Sync unavailable: PeerJS did not load');return}
+  lsBusy=1;lsSt('Sync: looking for the hub...');var p;
+  try{p=new Peer(HUB)}catch(e){lsReset('Sync: could not start, will retry');return}
+  lsP=p;
+  p.on('open',function(){if(lsP!==p)return;lsHub=1;lsBusy=0;lsHubSt()});
+  p.on('connection',function(cn){if(lsP===p&&lsHub)lsServe(cn)});
+  p.on('disconnected',function(){if(lsP===p&&lsHub)try{p.reconnect()}catch(x){}});
+  p.on('close',function(){if(lsP===p)lsReset('Sync: hub closed, will retry')});
+  p.on('error',function(e){if(lsP!==p)return;
+    if(e&&e.type==='unavailable-id'){lsP=null;try{p.destroy()}catch(x){}lsBusy=0;lsJoinHub();return}
+    if(e&&e.type==='peer-unavailable')return;
+    lsReset('Sync: could not reach the code server, will retry')})}
+function lsKick(){setTimeout(function(){if(!lsHub&&!lsUp&&!lsBusy&&!net)lsClaim()},800)}
+// closing the tab mid-run still records the score reached so far and pushes it over the open channel
+addEventListener('pagehide',function(){try{if(!running||kills<=0)return;
+  if(!runNet)lbRec('solo',lbName||cleanName($('nm').value)||'Player',kills,Date.now(),0);
+  else if(runHost){var nm=(live().length?hostList().map(function(a){return a[1]}):runNames).join(' & ').slice(0,60);if(nm)lbRec('multi',nm,kills,Date.now(),1)}}catch(e){}});
+if(FB)fbStart();setTimeout(lsClaim,1500);setInterval(function(){if(!lsHub&&!lsUp&&!lsBusy&&!net)lsClaim()},10000);
+// ===== online backend: Google Firebase Realtime Database (optional) =====
+// Paste your database URL below (see the setup steps). When set, EVERY score is written to the database the moment a run ends
+// (fetch keepalive, so it even survives the tab closing), every browser streams new scores live, and the browser-to-browser hub is not needed.
+// Left empty, the game keeps using the browser-to-browser sync above.
+function fbUrl(p){return FB.replace(/\/+$/,'')+p+'.json'}
+function fbKey(k,t){return k+'_'+t}
+function fbSt(ok){lsSt(ok?'Online scores: connected, every score is saved and synced live':'Online scores: offline, will reconnect automatically')}
+function fbPut(b,name,k,t,v){if(!FB)return;try{fetch(fbUrl('/scores2/'+b+'/'+fbKey(k,t)),{method:'PUT',body:JSON.stringify({n:name,k:k,t:t,v:v}),keepalive:true}).then(function(r){fbSt(r.ok)}).catch(function(){fbSt(0)})}catch(e){fbSt(0)}}
+function fbIngest(data){var items=[];['solo','multi'].forEach(function(b){var m=data&&data[b];if(m&&typeof m==='object')Object.keys(m).forEach(function(id){var o=m[id];if(o&&typeof o==='object')items.push([b==='multi'?1:0,o.n,o.k,o.t,o.v])})});return items.length?lbMergeAll(items):0}
+// anything this browser has that the database lacks (played offline, or before the backend existed) is uploaded
+function fbBackfill(data){['solo','multi'].forEach(function(b){var have=(data&&data[b])||{},ids=[],miss={};
+  lbAll(b).forEach(function(x){var id=fbKey(x.k,x.t),r=have[id];if(!r||(r.v|0)<x.v){miss[id]={n:x.n,k:x.k,t:x.t,v:x.v};ids.push(id)}});
+  for(var i=0;i<ids.length;i+=500){var part={};ids.slice(i,i+500).forEach(function(id){part[id]=miss[id]});
+    try{fetch(fbUrl('/scores2/'+b),{method:'PATCH',body:JSON.stringify(part)}).catch(function(){})}catch(e){}}})}
+function fbEv(ev){var m;try{m=JSON.parse(ev.data)}catch(e){return}if(!m||typeof m!=='object'||m.data==null)return;
+  var parts=String(m.path||'/').split('/').filter(Boolean),o={};
+  if(!parts.length){fbIngest(m.data);if(ev.type==='put')fbBackfill(m.data)}
+  else if(parts.length===1){o[parts[0]]=m.data;fbIngest(o)}
+  else if(parts.length===2){var bm={};bm[parts[1]]=m.data;o[parts[0]]=bm;fbIngest(o)}
+  fbSt(1)}
+function fbPull(){if(!FB)return;try{fetch(fbUrl('/scores2'),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(function(d){fbIngest(d);fbBackfill(d);fbSt(1)}).catch(function(e){console.warn('Leaderboard server error:',e);fbSt(0)})}catch(e){fbSt(0)}}
+function fbStart(){fbPull();setInterval(fbPull,15000);if(typeof EventSource!=='function'){lsSt('Online scores unavailable: this browser has no EventSource');return}
+  var es;try{es=new EventSource(fbUrl('/scores2'))}catch(e){fbSt(0);return}
+  es.addEventListener('put',fbEv);es.addEventListener('patch',fbEv);es.onopen=function(){fbSt(1)};es.onerror=function(){fbSt(0)}}
 var dragging=false,lx=0,ly=0;
 function look(dx,dy,s){if(cut||paused)return;s*=sens;dx=Math.max(-200,Math.min(200,dx));dy=Math.max(-200,Math.min(200,dy));yaw-=dx*s;pitch=Math.max(-1.45,Math.min(1.45,pitch-dy*s));}
 document.addEventListener('mousemove',function(e){if(!running||cut)return;
@@ -508,7 +611,8 @@ cv.addEventListener('mousedown',function(e){if(!running||cut||paused)return;
  if(e.button===0){firing=true;fire();}});
 document.addEventListener('mouseup',function(){dragging=false;firing=false});
 cv.addEventListener('wheel',function(e){if(running&&!cut&&!paused)sel((cur+(e.deltaY>0?1:3))%4)},{passive:true});
-addEventListener('keydown',function(e){if(e.code==='Tab'){e.preventDefault();if(running&&!paused)setLB(1);return}if(e.code==='Escape'){if(paused){if(Date.now()-pausedAt>350)resumeGame()}else pauseGame();return}keys[e.code]=true;if(!running||paused)return;if(cut){if(e.code==='Enter')skipCut();return}if(e.code==='KeyR')reload();
+addEventListener('keydown',function(e){if(e.code==='Tab'){e.preventDefault();if(running&&!paused)setLB(1);return}
+ if(e.code==='Escape'){if(paused){if(Date.now()-pausedAt>350)resumeGame()}else pauseGame();return}keys[e.code]=true;if(!running||paused)return;if(cut){if(e.code==='Enter')skipCut();return}if(e.code==='KeyR')reload();
  if(e.code==='Digit1')sel(0);if(e.code==='Digit2')sel(1);if(e.code==='Digit3')sel(2);if(e.code==='Digit4')sel(3);
  if(e.code==='KeyG'&&gren<=0)throwG();
  if(e.ctrlKey)e.preventDefault();
